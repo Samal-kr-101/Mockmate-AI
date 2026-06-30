@@ -76,7 +76,7 @@ useEffect(() => {
     new SpeechRecognition();
 
   recognitionInstance.continuous = true;
-  recognitionInstance.interimResults = true;
+  recognitionInstance.interimResults = false;
   recognitionInstance.maxAlternatives = 1;
   recognitionInstance.lang = "en-US";
 
@@ -97,29 +97,69 @@ useEffect(() => {
     console.log("🗣 Speech detected");
   };
 
-  recognitionInstance.onresult = (event) => {
+  // recognitionInstance.onresult = (event) => {
 
-    console.log("RESULT:", event);
+  //   console.log("RESULT:", event);
 
-    let transcript = "";
+  //   let transcript = "";
 
-    for (
-      let i = 0;
-      i < event.results.length;
-      i++
-    ) {
-      transcript +=
-        event.results[i][0]
-          .transcript;
-    }
+  //   for (
+  //     let i = 0;
+  //     i < event.results.length;
+  //     i++
+  //   ) {
+  //     transcript +=
+  //       event.results[i][0]
+  //         .transcript;
+  //   }
 
-    console.log(
-      "TRANSCRIPT:",
-      transcript
-    );
+  //   console.log(
+  //     "TRANSCRIPT:",
+  //     transcript
+  //   );
 
-    setAnswer(transcript);
-  };
+  //   setAnswer(transcript);
+  // };
+
+
+  recognitionInstance.interimResults = false;
+
+//   recognitionInstance.onresult = (event) => {
+
+//   let transcript = "";
+
+//   for (
+//     let i = event.resultIndex;
+//     i < event.results.length;
+//     i++
+//   ) {
+
+//     transcript +=
+//       event.results[i][0].transcript + " ";
+//   }
+
+//   setAnswer(prev => prev + transcript);
+// };
+
+
+
+recognitionInstance.onresult = (event) => {
+  let transcript = "";
+
+  for (
+    let i = event.resultIndex;
+    i < event.results.length;
+    i++
+  ) {
+    transcript += event.results[i][0].transcript + " ";
+  }
+
+  setAnswer(prev =>
+    (prev + transcript)
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+};
 
   recognitionInstance.onerror =
     (event) => {
@@ -159,32 +199,22 @@ useEffect(() => {
 
   }, [interviewId]);
 
-  // ==========================
-  // Text To Speech
-  // ==========================
-  const speakQuestion =
-    (text) => {
 
-      if (
-        !window.speechSynthesis
-      ) {
-        return;
-      }
 
-      window.speechSynthesis.cancel();
+// ==========================
+// Text To Speech
+// ==========================
+const speakQuestion = (text) => {
+  if (!window.speechSynthesis) return;
 
-      const utterance =
-        new SpeechSynthesisUtterance(
-          text
-        );
+  window.speechSynthesis.cancel();
 
-      utterance.rate = 1;
-      utterance.pitch = 1;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+};
 
-      window.speechSynthesis.speak(
-        utterance
-      );
-    };
 
   // ==========================
   // Start Interview
@@ -229,25 +259,23 @@ setTotalQuestions(session.totalQuestions);
   // ==========================
   // Voice Controls
   // ==========================
-  const startListening =
-    () => {
 
-      if (!recognition)
-        return;
 
-      setAnswer("");
+const startListening = () => {
+  if (!recognition || listening) return;
 
-      recognition.start();
-    };
+  window.speechSynthesis.cancel();
 
-  const stopListening =
-    () => {
+  setAnswer("");
 
-      if (!recognition)
-        return;
+  recognition.start();
+};
 
-      recognition.stop();
-    };
+  const stopListening = () => {
+  if (!recognition || !listening) return;
+
+  recognition.stop();
+};
 
   // ==========================
   // Submit Answer
@@ -299,17 +327,15 @@ setTotalQuestions(session.totalQuestions);
 setTotalQuestions(
   result.totalQuestions
 );
-          setQuestion(
-            result.nextQuestion
-          );
+          stopListening();
 
-          setAnswer("");
+setQuestion(result.nextQuestion);
 
-          setFeedback(null);
+setAnswer("");
 
-          speakQuestion(
-            result.nextQuestion.question
-          );
+setFeedback(null);
+
+speakQuestion(result.nextQuestion.question);
 
         }, 5000);
 
@@ -327,13 +353,21 @@ setTotalQuestions(
   // Loading
   // ==========================
   if (loading) {
-
-    return (
-      <h2>
-        Starting Interview...
-      </h2>
-    );
-  }
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        flexDirection: "column",
+      }}
+    >
+      <h2>🎤 Preparing Your AI Interview...</h2>
+      <p>Please wait while we generate your interview questions.</p>
+    </div>
+  );
+}
 
   if (!question) {
 
@@ -433,9 +467,7 @@ setTotalQuestions(
 
           <button
             className="record-btn"
-            onClick={
-              startListening
-            }
+            onClick={startListening}
           >
             🎤 Start Recording
           </button>

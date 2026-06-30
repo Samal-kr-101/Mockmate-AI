@@ -13,10 +13,37 @@ from "./routes/interviewRoutes.js";
 const app = express();
 
 
-app.use(cors({
-    origin: "https://mockmate-ai-ruddy.vercel.app",
+
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://mockmate-ai-ruddy.vercel.app",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow requests from Postman, curl, etc.
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
-}));
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+
+// app.use(cors({
+//   origin: true,
+//   credentials: true,
+// }));
+
 
 app.use(express.json());
 
