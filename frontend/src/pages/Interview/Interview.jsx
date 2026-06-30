@@ -354,17 +354,20 @@ speakQuestion(result.nextQuestion.question);
   // ==========================
   if (loading) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        flexDirection: "column",
-      }}
-    >
-      <h2>🎤 Preparing Your AI Interview...</h2>
-      <p>Please wait while we generate your interview questions.</p>
+    <div className="loading-container">
+      <div className="loader"></div>
+
+      <h2 className="loading-title">
+        🤖 Preparing Your AI Interview
+      </h2>
+
+      <p className="loading-text">
+        Generating personalized interview questions...
+      </p>
+
+      <p className="loading-subtext">
+        This usually takes a few seconds.
+      </p>
     </div>
   );
 }
