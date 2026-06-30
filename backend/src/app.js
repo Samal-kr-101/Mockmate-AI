@@ -14,7 +14,7 @@ const app = express();
 
 
 app.use(cors({
-    origin: "https://mockmate-ai-ruddy.vercel.app/",
+    origin: "https://mockmate-ai-ruddy.vercel.app",
     credentials: true,
 }));
 
