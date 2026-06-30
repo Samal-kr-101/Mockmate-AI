@@ -111,3 +111,22 @@ code {
 } */
 
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #0f172a;
+}
+
+h1,
+h2,
+h3,
+.logo,
+.nav-logo {
+  font-family: "Manrope", sans-serif;
+  font-weight: 700;
+}
