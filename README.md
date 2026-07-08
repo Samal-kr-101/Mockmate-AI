@@ -28,7 +28,6 @@ An AI-powered mock interview platform that helps students and job seekers prepar
 * React Router DOM
 * Axios
 * CSS3
-* React Icons
 
 ### Backend
 
