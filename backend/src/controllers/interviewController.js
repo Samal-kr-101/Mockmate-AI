@@ -9,74 +9,54 @@ import {
 // =====================================
 // GENERATE QUESTIONS
 // =====================================
-export const generateInterviewQuestions =
-  async (req, res) => {
-    try {
-      const interview =
-        await Interview.findById(
-          req.params.id
-        );
+export const generateInterviewQuestions = async (req, res) => {
+  try {
+    const interview = await Interview.findById(req.params.id);
 
-      if (!interview) {
-        return res.status(404).json({
-          message:
-            "Interview not found",
-        });
-      }
-
-      // Prevent duplicate questions
-      const existingQuestions =
-        await Question.find({
-          interview:
-            interview._id,
-        });
-
-      if (
-        existingQuestions.length > 0
-      ) {
-        return res.json(
-          existingQuestions
-        );
-      }
-
-      const aiResponse =
-        await generateQuestions(
-          interview.selectedRole,
-          interview.difficulty,
-          interview.totalQuestions
-        );
-
-      const questions =
-        aiResponse;
-
-      const savedQuestions =
-        [];
-
-      for (
-        const item of questions
-      ) {
-        const question =
-          await Question.create({
-            interview:
-              interview._id,
-            question:
-              item.question,
-          });
-
-        savedQuestions.push(
-          question
-        );
-      }
-
-      res.json(savedQuestions);
-
-    } catch (error) {
-      res.status(500).json({
-        message:
-          error.message,
+    if (!interview) {
+      return res.status(404).json({
+        message: "Interview not found",
       });
     }
-  };
+
+    // Prevent duplicate questions
+    const existingQuestions = await Question.find({
+      interview: interview._id,
+    }).sort({ order: 1 });
+
+    if (existingQuestions.length > 0) {
+      return res.json(existingQuestions);
+    }
+
+    // Generate AI Questions
+    const questions = await generateQuestions(
+      interview.selectedRole,
+      interview.difficulty,
+      interview.totalQuestions
+    );
+
+    const savedQuestions = [];
+
+    for (let i = 0; i < questions.length; i++) {
+      const question = await Question.create({
+        interview: interview._id,
+        question: questions[i].question,
+        order: i, // Save question order
+      });
+
+      savedQuestions.push(question);
+    }
+
+    res.status(200).json(savedQuestions);
+
+  } catch (error) {
+    console.error("Generate Questions Error:", error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 
 // =====================================

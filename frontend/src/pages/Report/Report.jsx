@@ -26,88 +26,115 @@ export default function Report() {
       const data = res?.data?.report || res?.data || res;
 
       setReport(data);
+
     } catch (err) {
       console.error(err);
       setReport(null);
+
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="report-loading">Loading Report...</div>;
+    return (
+      <div className="report-loading">
+        Loading Report...
+      </div>
+    );
   }
 
   if (!report) {
-    return <div className="report-empty">No Report Found</div>;
+    return (
+      <div className="report-empty">
+        No Report Found
+      </div>
+    );
   }
-
-  const baseQuestions = report?.questions?.slice(0, 5) || [];
 
   return (
     <div className="report-page">
 
-      {/* HEADER */}
       <div className="report-header">
 
         <div className="report-topbar">
-    <button
-      className="back-dashboard-btn"
-      onClick={() => navigate("/dashboard")}
-    >
-      ← Dashboard
-    </button>
-  </div>
+          <button
+            className="back-dashboard-btn"
+            onClick={() => navigate("/dashboard")}
+          >
+            ← Dashboard
+          </button>
+        </div>
 
-        <h1 className="report-title">Interview Report</h1>
+        <h1 className="report-title">
+          Interview Report
+        </h1>
 
         <div className="report-meta">
           <span className="meta-item">
-            Role: {report?.selectedRole}
+            Role: {report.selectedRole}
           </span>
 
           <span className="meta-item">
-            Difficulty: {report?.difficulty}
+            Difficulty: {report.difficulty}
           </span>
         </div>
+
       </div>
 
-      {/* STATS */}
+      {/* Stats */}
+
       <div className="report-stats">
 
         <div className="stat-card">
           <h3>Total Score</h3>
-          <p>{report?.totalScore}</p>
+          <p>{report.totalScore}</p>
         </div>
 
         <div className="stat-card">
           <h3>Total Questions</h3>
-          <p>{report?.questions?.length}</p>
+          <p>{report.questions.length}</p>
         </div>
 
         <div className="stat-card">
-          <h3>Base Questions</h3>
-          <p>{baseQuestions.length}</p>
+          <h3>Questions Answered</h3>
+          <p>
+            {
+              report.questions.filter(
+                q => q.candidateAnswer?.trim()
+              ).length
+            }
+          </p>
         </div>
 
         <div className="stat-card">
-          <h3>Follow-ups</h3>
-          <p>{(report?.questions?.length || 0) - 5}</p>
+          <h3>Average Score</h3>
+          <p>
+            {
+              report.questions.length
+                ? (
+                    report.totalScore /
+                    report.questions.length
+                  ).toFixed(1)
+                : 0
+            }
+          </p>
         </div>
 
       </div>
 
-      {/* QUESTIONS */}
+      {/* Questions */}
+
       <div className="question-list">
 
-        {baseQuestions.map((q, index) => (
+        {report.questions.map((q, index) => (
           <QuestionCard
-            key={q._id || index}
+            key={q._id}
             index={index}
-            question={q?.question}
-            answer={q?.candidateAnswer}
-            feedback={q?.feedback}
-            score={q?.score}
+            question={q.question}
+            answer={q.candidateAnswer}
+            feedback={q.feedback}
+            score={q.score}
           />
         ))}
 
